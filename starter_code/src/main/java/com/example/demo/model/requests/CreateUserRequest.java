@@ -2,16 +2,24 @@ package com.example.demo.model.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateUserRequest {
 
-	@JsonProperty
-	private String username;
+    @JsonProperty
+    @Getter
+    private String username;
 
-	public String getUsername() {
-		return username;
-	}
+    @JsonProperty
+    @Getter
+    private String password;
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    @JsonProperty
+    @Getter
+    private String confirmPassword;
+
 }

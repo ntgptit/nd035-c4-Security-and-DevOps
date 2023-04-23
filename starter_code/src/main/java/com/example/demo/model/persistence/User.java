@@ -13,49 +13,64 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 @Entity
 @Table(name = "user")
 public class User {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@JsonProperty
-	private long id;
-	
-	@Column(nullable = false, unique = true)
-	@JsonProperty
-	private String username;
-	
-	@OneToOne(cascade = CascadeType.ALL)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty
+    private long id;
+
+    @Column(nullable = false, unique = true)
+    @JsonProperty
+    private String username;
+
+    @Column(nullable = false)
+    @JsonProperty
+    private String password;
+
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
-	@JsonIgnore
+    @JsonIgnore
     private Cart cart;
-	
-	public Cart getCart() {
-		return cart;
-	}
 
-	public void setCart(Cart cart) {
-		this.cart = cart;
-	}
+    public Cart getCart() {
+        return this.cart;
+    }
 
-	public long getId() {
-		return id;
-	}
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    public long getId() {
+        return this.id;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	
-	
-	
+    public String getUsername() {
+        return this.username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return this.password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
 }
