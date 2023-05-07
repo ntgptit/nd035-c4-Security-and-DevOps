@@ -23,21 +23,21 @@ import com.example.demo.config.jwt.JwtAuthenticationFilter;
 @Configuration
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsServiceImpl;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsServiceImpl;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+	@Autowired
+	private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
-    }
+	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
+		return new JwtAuthenticationFilter();
+	}
 
-    @Bean(name = "PasswordEncoder")
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean(name = "PasswordEncoder")
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
 //    private UserDetailsServiceImpl userDetailsService;
 //    private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -48,32 +48,42 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 //        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 //    }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().exceptionHandling()
-                .authenticationEntryPoint(this.unauthorizedHandler)
-                .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL, SecurityConstants.SIGN_IN_URL).permitAll()
-                .anyRequest().authenticated()
-                .and()
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(this.unauthorizedHandler).and()
+				.authorizeRequests()
+				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL, SecurityConstants.SIGN_IN_URL).permitAll()
+				.anyRequest().authenticated().and()
 //                .addFilter(new JWTAuthenticationFilter(authenticationManagerBean()))
 //                .addFilter(new JWTAuthenticationVerficationFilter(authenticationManagerBean()))
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+	}
 
-    @Bean(BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+	@Bean(BeanIds.AUTHENTICATION_MANAGER)
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.parentAuthenticationManager(authenticationManagerBean())
-                .userDetailsService(this.userDetailsServiceImpl)
-                .passwordEncoder(this.bCryptPasswordEncoder());
-    }
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.parentAuthenticationManager(authenticationManagerBean()).userDetailsService(this.userDetailsServiceImpl)
+				.passwordEncoder(this.bCryptPasswordEncoder());
+	}
 
+//	@Bean
+//	public AuthenticationProvider authenticationProvider() {
+//		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//		authProvider.setUserDetailsService(this.userDetailsServiceImpl);
+//		authProvider.setPasswordEncoder(bCryptPasswordEncoder());
+//		return authProvider;
+//	}
+//
+//	@Bean
+//	public ProviderManager providerManager() {
+//		ProviderManager providerManager = new ProviderManager(Arrays.asList(myAuthenticationProvider));
+//		providerManager.setEraseCredentialsAfterAuthentication(false);
+//		return providerManager;
+//	}
 }

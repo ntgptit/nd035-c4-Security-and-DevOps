@@ -1,11 +1,16 @@
 package com.example.demo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.BeanIds;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.config.jwt.JwtResponse;
 import com.example.demo.config.jwt.JwtTokenProvider;
+import com.example.demo.config.security.UserDetailsServiceImpl;
 import com.example.demo.model.requests.CreateUserRequest;
 
 /**
@@ -23,26 +29,37 @@ import com.example.demo.model.requests.CreateUserRequest;
 @RequestMapping("/api/auth")
 public class JwtAuthenticationController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+	@Autowired
+	private UserDetailsServiceImpl userDetailsServiceImpl;
 
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+	@Autowired
+	@Qualifier(BeanIds.AUTHENTICATION_MANAGER)
+	private AuthenticationManager authenticationManager;
 
-    @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody CreateUserRequest loginRequest) {
+	@Autowired
+	private JwtTokenProvider jwtTokenProvider;
 
-        Authentication authentication = this.authenticationManager
-                .authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginRequest.getUsername(),
-                                loginRequest.getPassword()));
+	@Autowired
+	@Qualifier("PasswordEncoder")
+	private BCryptPasswordEncoder passwordEncoder;
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+	@PostMapping("/login")
+	public ResponseEntity<JwtResponse> login(@RequestBody CreateUserRequest loginRequest) {
 
-        String token = this.jwtTokenProvider.generateToken(authentication);
+		UserDetails user = userDetailsServiceImpl.loadUserByUsername(loginRequest.getUsername());
 
-        return ResponseEntity.ok(new JwtResponse(loginRequest.getUsername(), token));
-    }
+		if (!passwordEncoder.matches(user.getPassword(), loginRequest.getPassword())) {
+			throw new BadCredentialsException("Password invalid");
+		}
+
+		Authentication authentication = this.authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		String token = this.jwtTokenProvider.generateToken(authentication);
+
+		return ResponseEntity.ok(new JwtResponse(loginRequest.getUsername(), token));
+	}
 
 }
